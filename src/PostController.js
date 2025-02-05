@@ -1,12 +1,10 @@
 import Post from "./Post.js";
+import PostService from "./PostService.js";
 
 class PostController {
     async create(req, res) {
         try {
-            const {author, title, content, picture} = req.body;
-            const post = new Post({author, title, content, picture});
-            await post.save();
-            console.log("Created post:", post);
+            const post = await PostService.create(req.body);
             return res.json(post);
         } catch (error) {
             console.error("Error creating post:", error);
@@ -17,10 +15,7 @@ class PostController {
     async getOne(req, res) {
         try {
             const {id} = req.params;
-            if (!id) {
-                res.status(400).json({message: "Id is required"})
-            }
-            const post = await Post.findById(id)
+            const post = await PostService.getOne(id)
             return res.json(post)
         } catch (e) {
             res.status(500).json(e)
@@ -29,7 +24,7 @@ class PostController {
 
     async getAll(req, res) {
         try {
-            const posts = await Post.find();
+            const posts = await PostService.getAll();
             return res.json(posts)
         } catch (e) {
             res.status(500).json(e)
@@ -38,11 +33,9 @@ class PostController {
 
     async update(req, res) {
         try {
+            const {id} = req.params
             const post = req.body
-            if (!post._id) {
-                res.status(400).json({message: "Id is required"})
-            }
-            const updatedPost = await Post.findByIdAndUpdate(post._id, post, {new: true})
+            const updatedPost = await PostService.update(id, post)
             return res.json(updatedPost)
         } catch (e) {
             res.status(500).json(e)
@@ -52,7 +45,7 @@ class PostController {
     async delete(req, res) {
         try {
             const {id} = req.params
-            const post = await Post.findOneAndDelete(id);
+            const post = await PostService.delete(id);
             return res.json(post)
         } catch (e) {
             res.status(500).json(e)
